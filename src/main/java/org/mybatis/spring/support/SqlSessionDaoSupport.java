@@ -32,33 +32,25 @@ import static org.springframework.util.Assert.notNull;
  *
  * @author Putthiphong Boonphong
  * @author Eduardo Macarron
- *
  * @see #setSqlSessionFactory
  * @see #setSqlSessionTemplate
  * @see SqlSessionTemplate
  */
-//父类DaoSupport实现了InitializingBean接口的afterPropertiesSet方法，在初始化完成后会调用checkDaoConfig方法和initDao方法
+/*
+父类DaoSupport实现了InitializingBean接口的afterPropertiesSet方法，在初始化完成后会调用checkDaoConfig方法和initDao方法
+checkDaoConfig方法检查sqlSessionTemplate是否设置上了，一般情况下sqlSessionTemplate都是通过调用setSqlSessionFactory方法
+设置的(如org/mybatis/spring/sample/config/applicationContext-mapper.xml文件中使用byType注入sqlSessionFactory，注入后sqlSessionTemplate也将被初始化)
+ */
 public abstract class SqlSessionDaoSupport extends DaoSupport {
 
     private SqlSessionTemplate sqlSessionTemplate;
-
-    /**
-     * Set MyBatis SqlSessionFactory to be used by this DAO.
-     * Will automatically create SqlSessionTemplate for the given SqlSessionFactory.
-     *
-     * @param sqlSessionFactory a factory of SqlSession
-     */
-    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
-        if (this.sqlSessionTemplate == null || sqlSessionFactory != this.sqlSessionTemplate.getSqlSessionFactory()) {
-            this.sqlSessionTemplate = createSqlSessionTemplate(sqlSessionFactory);
-        }
-    }
 
     /**
      * Create a SqlSessionTemplate for the given SqlSessionFactory.
      * Only invoked if populating the DAO with a SqlSessionFactory reference!
      * <p>Can be overridden in subclasses to provide a SqlSessionTemplate instance
      * with different configuration, or a custom SqlSessionTemplate subclass.
+     *
      * @param sqlSessionFactory the MyBatis SqlSessionFactory to create a SqlSessionTemplate for
      * @return the new SqlSessionTemplate instance
      * @see #setSqlSessionFactory
@@ -77,16 +69,16 @@ public abstract class SqlSessionDaoSupport extends DaoSupport {
         return (this.sqlSessionTemplate != null ? this.sqlSessionTemplate.getSqlSessionFactory() : null);
     }
 
-
     /**
-     * Set the SqlSessionTemplate for this DAO explicitly,
-     * as an alternative to specifying a SqlSessionFactory.
+     * Set MyBatis SqlSessionFactory to be used by this DAO.
+     * Will automatically create SqlSessionTemplate for the given SqlSessionFactory.
      *
-     * @param sqlSessionTemplate a template of SqlSession
-     * @see #setSqlSessionFactory
+     * @param sqlSessionFactory a factory of SqlSession
      */
-    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-        this.sqlSessionTemplate = sqlSessionTemplate;
+    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+        if (this.sqlSessionTemplate == null || sqlSessionFactory != this.sqlSessionTemplate.getSqlSessionFactory()) {
+            this.sqlSessionTemplate = createSqlSessionTemplate(sqlSessionFactory);
+        }
     }
 
     /**
@@ -114,6 +106,17 @@ public abstract class SqlSessionDaoSupport extends DaoSupport {
      */
     public SqlSessionTemplate getSqlSessionTemplate() {
         return this.sqlSessionTemplate;
+    }
+
+    /**
+     * Set the SqlSessionTemplate for this DAO explicitly,
+     * as an alternative to specifying a SqlSessionFactory.
+     *
+     * @param sqlSessionTemplate a template of SqlSession
+     * @see #setSqlSessionFactory
+     */
+    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+        this.sqlSessionTemplate = sqlSessionTemplate;
     }
 
     /**

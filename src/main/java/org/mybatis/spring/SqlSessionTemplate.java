@@ -98,6 +98,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
      */
     public SqlSessionTemplate(SqlSessionFactory sqlSessionFactory, ExecutorType executorType) {
         this(sqlSessionFactory, executorType,
+                //用于包装MyBatis的异常到Spring中的DataAccessException
                 new MyBatisExceptionTranslator(
                         sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(), true));
     }
@@ -148,6 +149,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
      */
     @Override
     public <T> T selectOne(String statement) {
+        //所有的数据库方法调用都用sqlSessionProxy执行
         return this.sqlSessionProxy.selectOne(statement);
     }
 
@@ -308,6 +310,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
      */
     @Override
     public <T> T getMapper(Class<T> type) {
+        //这里返回指定的mapper并把当前的sqlSession即sqlSessionTemplate传进去，这样在用户调用mapper方法的时候方法调用会有sqlSessionTemplate执行(从getMapper开始到数据库结束的过程可以看https://github.com/haifeng9414/mybatis-3项目里的注释和README)
         return getConfiguration().getMapper(type, this);
     }
 
@@ -418,6 +421,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
     private class SqlSessionInterceptor implements InvocationHandler {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            //如果当前线程存在未提交sqlSession则返回，否则新建一个
             SqlSession sqlSession = getSqlSession(
                     SqlSessionTemplate.this.sqlSessionFactory,
                     SqlSessionTemplate.this.executorType,

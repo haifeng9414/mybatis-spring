@@ -92,6 +92,7 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
      */
     @Override
     public T getObject() throws Exception {
+        //这里返回的是sqlSessionTemplate，默认是单例的
         return getSqlSession().getMapper(this.mapperInterface);
     }
 
